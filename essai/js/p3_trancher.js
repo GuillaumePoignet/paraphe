@@ -51,9 +51,9 @@ function etiquettes(d) {
     el('span', { class: 'etiq' }, [
       d.urgent ? el('span', { class: 'urgent-tag' }, 'Urgent') : null,
       el('span', { class: 'pole', style: { '--c': p.c } }, p.lib),
-      el('span', { class: 'type' }, [icone(estInfo(d) ? 'info' : d.type), t.lib]),
+      d.type === 'message' ? null : el('span', { class: 'type' }, [icone(estInfo(d) ? 'info' : d.type), t.lib]),
     ]),
-    estInfo(d) ? el('span', { class: 'echeance' }, depuis(d.depose_le))
+    sansEcheance(d) ? el('span', { class: 'echeance' }, depuis(d.depose_le))
       : el('span', { class: 'echeance' + (estUrgent(d.echeance) ? ' urgent' : '') }, echeanceTexte(d.echeance)),
   ]);
 }
@@ -102,6 +102,65 @@ function carteDemande(d) {
   ]);
 }
 
+// ---------- Côté équipe : les envois, avec la réponse de Sophia sur le message même ----------
+// v6 (25/11/2026, JL : « où est-ce qu'on voit les retours de Sophia ? » ; arbitrage :
+// « Sur le message même ») : chaque envoi porte « En attente » ou la réponse de Sophia,
+// en couleur, avec son commentaire et son message vocal. Le plus récent en haut
+// (réponse ou envoi).
+function envois() {
+  return S.demandes.filter(filtree).map(d => ({ d, rep: null, quand: d.depose_le }))
+    .concat(S.tranchees.filter(x => filtree(x.demande)).map(x => ({ d: x.demande, rep: x, quand: x.le })))
+    .sort((a, b) => new Date(b.quand) - new Date(a.quand));
+}
+
+function blocReponse(d, rep) {
+  if (!rep) return el('div', { class: 'reponse attente-rep' }, estInfo(d) ? 'Pas encore vu par Sophia' : 'En attente de Sophia');
+  const ch = CHOIX[rep.choix] || CHOIX.vu;
+  const v = rep.vocal || d.vocal;
+  const zoneVocal = el('div', { class: 'histo-vocal' });
+  if (v) zoneVocal.append(el('button', { class: 'b-ecouter', onclick: () => ecouterVocal(v, zoneVocal) }, [icone('lecture'), 'Écouter' + (v.duree ? ' (' + duree(v.duree) + ')' : '')]));
+  return el('div', { class: 'reponse', style: { '--r': ch.c } }, [
+    el('div', { class: 'rep-tete' }, [el('b', null, ch.lib), ' · Sophia, ' + nomJour(rep.le) + ' à ' + heure(rep.le)]),
+    rep.commentaire ? el('p', { class: 'rep-com' }, rep.commentaire) : null,
+    v ? zoneVocal : null,
+  ]);
+}
+
+function carteEnvoi(o) {
+  const d = o.d, p = POLES[poleDe(d)], pieces = d.pieces || [];
+  return el('div', { class: 'carte carte-envoi' + (o.rep ? ' repondu' : ''), style: { '--c': p.c }, 'data-id': d.id }, [
+    el('div', { class: 'ligne1' }, [
+      el('span', { class: 'etiq' }, [
+        d.urgent ? el('span', { class: 'urgent-tag' }, 'Urgent') : null,
+        el('span', { class: 'pole', style: { '--c': p.c } }, p.lib),
+        estInfo(d) ? el('span', { class: 'type' }, [icone('info'), 'Info']) : null,
+      ]),
+      el('span', { class: 'echeance' }, d.depose_par + ', ' + depuis(d.depose_le)),
+    ]),
+    el('h3', null, d.titre),
+    d.mot ? el('p', { class: 'bref' }, d.mot) : null,
+    pieces.length ? el('div', { class: 'docs' }, pieces.map(x =>
+      el('button', { onclick: () => ouvrirPiece(x, pieces) }, [icone(iconePiece(x)), el('span', null, x.nom || x.titre || 'Document')]))) : null,
+    blocReponse(d, o.rep),
+  ]);
+}
+
+function rendreEnvois() {
+  rendreFiltres();
+  const n = S.demandes.length;
+  $('#compte').textContent = n ? String(n) : '';
+  $('#compte').hidden = !n;
+  rendreOnglets();
+  const zone = $('#liste');
+  zone.innerHTML = '';
+  const L = envois();
+  if (!L.length) zone.appendChild(el('div', { class: 'vide' }, S.filtrePole
+    ? [el('strong', null, 'Rien pour « ' + POLES[S.filtrePole].lib + ' »'), 'Touche le filtre à nouveau pour tout revoir.']
+    : [el('strong', null, 'Aucun envoi pour l\'instant'), 'Écris ton message à Sophia ci-dessus.']));
+  L.forEach(o => zone.appendChild(carteEnvoi(o)));
+  if (SOURCE.mode === 'serveur') zone.appendChild(el('button', { class: 'deconnexion', onclick: () => SOURCE.deconnexion() }, 'Se déconnecter de ce téléphone'));
+}
+
 // « Vu » touché depuis la liste : rien ne s'ouvre, l'info disparaît, Annuler possible.
 function vuDepuisListe(d) {
   if (!estDeputee()) return;
@@ -112,6 +171,7 @@ function vuDepuisListe(d) {
 
 function rendreListe() {
   trierDemandes();
+  if (!estDeputee()) return rendreEnvois();
   rendreFiltres();
   const A = arbitrages(), I = infos();
   const total = S.demandes.filter(d => !estInfo(d)).length;

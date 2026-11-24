@@ -76,7 +76,7 @@ function rendreLecteur() {
   const d = o.demande;
   L.innerHTML = '';
   const titre = d ? d.titre : (p.titre || p.nom || 'Document');
-  const sous = d ? [d.urgent ? 'Urgent' : '', POLES[poleDe(d)].lib, estInfo(d) ? 'Pour info' : echeanceTexte(d.echeance)].filter(Boolean).join(' · ') : (p.nom || '');
+  const sous = d ? [d.urgent ? 'Urgent' : '', POLES[poleDe(d)].lib, estInfo(d) ? 'Pour info' : sansEcheance(d) ? depuis(d.depose_le) : echeanceTexte(d.echeance)].filter(Boolean).join(' · ') : (p.nom || '');
   const choixPiece = o.pieces.length > 1 ? el('div', { class: 'onglets-pieces' }, o.pieces.map((x, i) =>
     el('button', { 'aria-pressed': String(i === o.index), onclick: () => { if (i !== o.index) { o.index = i; o.zoom = 1; rendreLecteur(); } } }, x.nom || x.titre || ('Pièce ' + (i + 1))))) : null;
   const vue = el('div', { class: 'vue-doc', id: 'vue-doc' }, el('div', { class: 'pages', id: 'pages' }, el('p', { class: 'charge' }, 'Ouverture du document...')));

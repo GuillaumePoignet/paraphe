@@ -13,6 +13,14 @@
 // par jour avec ses rendez-vous empilés tels qu'avant (heure, titre, lieu,
 // documents) ; on glisse le doigt d'un jour à l'autre, sans fin vers le passé comme
 // vers l'avenir ; les jours se chargent au fur et à mesure.
+//
+// v6 (25/11/2026, JL : « j'aime pas le truc de quand on swipe, ça décale vers le jour
+// d'après. C'est pas smooth [...] ça glisse pas, ça bloque » ; arbitrage : « Totalement
+// libre ») : plus aucun calage sur les jours ; la bande glisse avec l'élan du doigt et
+// s'arrête où on la laisse. À la souris, on la tire de la même façon.
+// JL : « sur ordinateur, ça prend pas tout l'écran [...] que ça puisse prendre bien
+// l'écran pile » : à l'ordinateur, autant de jours que la largeur le permet, qui
+// remplissent exactement la zone.
 
 const PAS_AGENDA = 14;   // jours ajoutés d'un coup quand on approche d'un bord
 
@@ -38,7 +46,7 @@ function fusionnerAgenda(liste, debut, fin) {
 function boutonsDocs(e) {
   if (!e.docs || !e.docs.length) return null;
   return el('div', { class: 'docs' }, e.docs.map(doc =>
-    el('button', { onclick: () => ouvrirPiece(doc, e.docs) }, [icone(iconePiece(doc)), doc.titre || doc.nom || 'Document'])));
+    el('button', { onclick: () => ouvrirPiece(doc, e.docs) }, [icone(iconePiece(doc)), el('span', null, doc.titre || doc.nom || 'Document')])));
 }
 
 function colonneJour(k) {
@@ -63,6 +71,8 @@ function colonneJour(k) {
         el('div', { class: 't' }, e.titre),
         e.lieu ? el('div', { class: 'l' }, e.lieu) : null,
         boutonsDocs(e),
+        // v6 : l'équipe joint une note au rendez-vous ici (ou en y glissant le fichier).
+        !estDeputee() && !passe ? el('button', { class: 'joindre', onclick: () => choisirPourRdv(e.id) }, [icone('trombone'), 'Joindre']) : null,
       ]),
     ]));
   });
@@ -82,7 +92,9 @@ function rendreAgenda() {
   if (!b) return;
   b.innerHTML = '';
   for (let k = S.agPlage.de; k <= S.agPlage.a; k++) b.appendChild(colonneJour(k));
-  placerBande(S.jourSel, false);
+  joursVisibles();
+  // v6 : la bande s'arrête n'importe où ; on la remet exactement au même endroit.
+  placerBande(S.jourPos != null ? S.jourPos : S.jourSel, false);
 }
 
 function placerBande(k, doux) {
@@ -92,7 +104,33 @@ function placerBande(k, doux) {
   // Glissement doux pour un jour ou deux ; saut direct au-delà (« Aujourd'hui » depuis loin).
   if (doux && Math.abs(x - b.scrollLeft) > 3 * w) doux = false;
   if (doux && b.scrollTo) b.scrollTo({ left: x, behavior: 'smooth' });
-  else { b.style.scrollSnapType = 'none'; b.scrollLeft = x; requestAnimationFrame(() => { b.style.scrollSnapType = ''; }); }
+  else b.scrollLeft = x;
+}
+
+function allerAuJour(k) { S.jourSel = k; S.jourPos = k; placerBande(k, true); }
+
+// À l'ordinateur : nombre de jours visibles d'après la largeur (une colonne fait 220 px au moins).
+function joursVisibles() {
+  const b = $('#bande');
+  if (!b || !grandEcran()) { if (b) b.style.removeProperty('--n'); return; }
+  b.style.setProperty('--n', String(Math.max(2, Math.floor((b.clientWidth + 12) / 232))));
+}
+
+// À la souris : on attrape la bande et on la tire ; un clic reste un clic si l'on n'a pas bougé.
+function tirerALaSouris(b) {
+  let x0 = null, s0 = 0, bouge = false;
+  b.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('button')) return;
+    x0 = e.clientX; s0 = b.scrollLeft; bouge = false;
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (x0 === null) return;
+    const dx = e.clientX - x0;
+    if (!bouge && Math.abs(dx) > 4) { bouge = true; b.classList.add('tiree'); }
+    if (bouge) b.scrollLeft = s0 - dx;
+  });
+  window.addEventListener('pointerup', () => { x0 = null; b.classList.remove('tiree'); });
+  b.addEventListener('click', (e) => { if (bouge) { e.stopPropagation(); e.preventDefault(); bouge = false; } }, true);
 }
 
 // Après chaque glissement : le jour affiché, et des jours en plus si l'on approche d'un bord.
@@ -102,10 +140,11 @@ function suivreBande() {
   minuterieBande = setTimeout(() => {
     const b = $('#bande'), w = largeurJour();
     if (!w) return;
-    S.jourSel = S.agPlage.de + Math.round(b.scrollLeft / w);
+    S.jourPos = S.agPlage.de + b.scrollLeft / w;
+    S.jourSel = Math.round(S.jourPos);
     rendreEnteteAgenda();
     if (S.jourSel - S.agPlage.de < 5) etendreAgenda(-1);
-    else if (S.agPlage.a - S.jourSel < 7) etendreAgenda(1);
+    else if (S.agPlage.a - S.jourSel < 14) etendreAgenda(1);
   }, 140);
 }
 
@@ -131,15 +170,17 @@ function rendreEnteteAgenda() {
   if (!z) return;
   z.innerHTML = '';
   z.append(
-    el('button', { class: 'nav-jour', 'aria-label': 'Jour précédent', onclick: () => placerBande(S.jourSel - 1, true) }, icone('gauche')),
-    el('button', { class: 'lien' + (S.jourSel === 0 ? ' discret' : ''), onclick: () => { S.jourSel = 0; placerBande(0, true); } }, "Aujourd'hui"),
-    el('button', { class: 'nav-jour', 'aria-label': 'Jour suivant', onclick: () => placerBande(S.jourSel + 1, true) }, icone('droite')),
+    el('button', { class: 'nav-jour', 'aria-label': 'Jour précédent', onclick: () => allerAuJour(Math.ceil((S.jourPos != null ? S.jourPos : S.jourSel) - 0.05) - 1) }, icone('gauche')),
+    el('button', { class: 'lien' + (S.jourSel === 0 ? ' discret' : ''), onclick: () => allerAuJour(0) }, "Aujourd'hui"),
+    el('button', { class: 'nav-jour', 'aria-label': 'Jour suivant', onclick: () => allerAuJour(Math.floor((S.jourPos != null ? S.jourPos : S.jourSel) + 0.05) + 1) }, icone('droite')),
   );
 }
 
 function preparerAgenda() {
   const b = $('#bande');
   b.addEventListener('scroll', suivreBande, { passive: true });
-  window.addEventListener('resize', () => placerBande(S.jourSel, false));
+  tirerALaSouris(b);
+  joursVisibles();
+  window.addEventListener('resize', () => { joursVisibles(); placerBande(S.jourPos != null ? S.jourPos : S.jourSel, false); });
   rendreEnteteAgenda();
 }

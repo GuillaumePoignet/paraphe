@@ -53,7 +53,7 @@ function ouvrirAideIphone() {
     el('ol', { class: 'etapes' }, [
       el('li', null, [el('b', null, 'Partager'), ' : touche le carré avec une flèche vers le haut, en bas de Safari.']),
       el('li', null, [el('b', null, "Sur l'écran d'accueil"), ' : fais défiler et touche cette ligne, puis « Ajouter ».']),
-      el('li', null, ["Ouvre « À décider » depuis sa nouvelle icône et touche ", el('b', null, 'Activer'), '.']),
+      el('li', null, ["Ouvre « Paraphe » depuis sa nouvelle icône et touche ", el('b', null, 'Activer'), '.']),
     ]),
     el('button', { class: 'envoyer', style: { background: 'var(--violet)' }, onclick: () => depiler() }, "J'ai compris"),
   );

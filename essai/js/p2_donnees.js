@@ -4,6 +4,8 @@
 // v5 (24/11/2026) : pôles (Cabinet, Com, Légistique), urgent, pièces d'exemple
 // lisibles dans la visionneuse (FICHIERS_EXEMPLE, ajoutés par la construction),
 // agenda d'exemple sur tous les jours, pour le défilement sans fin.
+// v6 (25/11/2026) : les dépôts de l'équipe sont des messages, sans type ni échéance ;
+// « #equipe » dans l'adresse montre l'appli côté équipe, avec des réponses de Sophia.
 // Aucune personne réelle, aucun chiffre réel.
 
 function aJour(decalage, h, m) {
@@ -54,18 +56,18 @@ function donneesExemple() {
       titre: 'Courrier au préfet de police pour Madame B., titre de séjour',
       mot: 'Prêt à partir, sur le modèle des courriers déjà envoyés au préfet.',
       pieces: [pieceExemple('2026_11_24_Courrier_Prefet_Madame_B.pdf', 'courrier')] },
-    { id: 'q2', type: 'tweet', pole: 'com', depose_par: 'Communication', depose_le: ilYa(40), echeance: aJour(1, 11),
+    { id: 'q2', type: 'message', pole: 'com', depose_par: 'Julien', depose_le: ilYa(40), echeance: ilYa(40),
       titre: 'Visuel et message pour annoncer la permanence',
       pieces: [pieceExemple('Visuel permanence.png', 'visuel', 'image/png')] },
     { id: 'q3', type: 'rdv', pole: 'cabinet', depose_par: 'Guillaume', depose_le: ilYa(180), echeance: aJour(1, 18),
       titre: "Rendez-vous avec l'association Exemple du 20e",
       creneau: { debut: aJour(3, 10, 0), fin: aJour(3, 11, 0), lieu: 'Permanence, 20e' },
       mot: 'Plutôt oui. Première demande de leur part, sur les loyers du quartier.' },
-    { id: 'q8', type: 'note', pole: 'legistique', depose_par: 'Légistique', depose_le: ilYa(60), echeance: aJour(2, 12),
+    { id: 'q8', type: 'message', pole: 'legistique', depose_par: 'Anthony', depose_le: ilYa(60), echeance: ilYa(60),
       titre: 'Amendement sur le projet de loi Exemple, article 3',
       mot: 'À déposer avant jeudi midi. Cosignatures du groupe en cours.',
       pieces: [pieceExemple('Amendement article 3.pdf', 'amendement')] },
-    { id: 'q4', type: 'video', pole: 'com', depose_par: 'Communication', depose_le: ilYa(25), echeance: aJour(2, 9),
+    { id: 'q4', type: 'message', pole: 'com', depose_par: 'Julien', depose_le: ilYa(25), echeance: ilYa(25),
       titre: 'Vidéo courte sur la séance de mardi',
       pieces: [pieceExemple('Extrait séance.mp4', '', 'video/mp4')] },
     { id: 'q5', type: 'media', pole: 'com', depose_par: 'Communication', depose_le: ilYa(300), echeance: aJour(3, 12),
@@ -81,7 +83,17 @@ function donneesExemple() {
       mot: 'Trois articles sur le 20e cette semaine.' },
   ];
 
-  return { demandes, agenda };
+  // v6 : réponses déjà données, vues côté équipe sur les envois mêmes.
+  const tranchees = [
+    { choix: 'oui', commentaire: 'Oui, mais on enlève la dernière phrase.', le: ilYa(12),
+      demande: { id: 'r1', type: 'message', pole: 'cabinet', depose_par: 'Guillaume', depose_le: ilYa(130), titre: 'Réponse à la lettre du collectif de parents Exemple', pieces: [pieceExemple('Réponse collectif parents.pdf', 'courrier')] } },
+    { choix: 'revoir', commentaire: 'Trop long. Deux phrases au plus, et le lien vers la vidéo.', le: ilYa(70),
+      demande: { id: 'r2', type: 'message', pole: 'com', depose_par: 'Julien', depose_le: ilYa(200), titre: 'Message pour annoncer la réunion publique' } },
+    { choix: 'vu', commentaire: '', le: ilYa(240),
+      demande: { id: 'r3', type: 'info', pole: 'cabinet', depose_par: 'Guillaume', depose_le: ilYa(320), titre: 'La mairie confirme la salle pour jeudi' } },
+  ];
+
+  return { demandes, agenda, tranchees };
 }
 
 function octetsBase64(b64) { const s = atob(b64), o = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) o[i] = s.charCodeAt(i); return o; }
@@ -91,7 +103,10 @@ const SOURCE = {
   mode: 'exemples',
   async demarrer() {
     const D = donneesExemple();
-    S.demandes = D.demandes; S.agenda = D.agenda; S.moi = { nom: 'Sophia', role: 'deputee' };
+    S.demandes = D.demandes; S.agenda = D.agenda;
+    const equipe = /equipe/.test(location.hash + location.search);
+    S.moi = equipe ? { nom: 'Guillaume', role: 'equipe', pole: 'cabinet' } : { nom: 'Sophia', role: 'deputee' };
+    S.tranchees = D.tranchees;
     toutRendre();
     return true;
   },
@@ -101,6 +116,7 @@ const SOURCE = {
   async televerser(nom, mime) { return { ok: true, piece: pieceExemple(nom, '', mime) }; },
   async deposer(q) {
     q.id = 'q' + Date.now(); q.depose_par = S.moi.nom; q.depose_le = new Date().toISOString(); q.pole = S.moi.pole || 'cabinet';
+    q.echeance = q.echeance || q.depose_le;
     q.pieces = (q.pieces || []).map(p => p.url ? pieceExemple(p.url) : p);
     S.demandes.push(q); return { ok: true, id: q.id };
   },

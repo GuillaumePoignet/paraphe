@@ -99,6 +99,9 @@ const ICONES = {
   moins: '<path d="M5 12h14"/>',
   gauche: '<path d="m15 5-7 7 7 7"/>',
   droite: '<path d="m9 5 7 7-7 7"/>',
+  envoyer: '<path d="M4 12 20 4l-6 16-3-7z"/><path d="m11 13 9-9"/>',
+  trombone: '<path d="M20 11.5 12.4 19a5 5 0 0 1-7.1-7.1l8-8a3.4 3.4 0 0 1 4.8 4.8l-8 8a1.7 1.7 0 0 1-2.4-2.4l7.4-7.4"/>',
+  paraphe: '<path d="M3.8 15c2.2-5.2 4.5-8.3 6-8.3 1.9 0-1.1 8.3 1.1 8.3 1.9 0 2.6-4.5 4.1-4.5 1.1 0 .4 3.4 1.9 3.4 1.1 0 1.9-1.5 3.4-2.3"/><path d="M4.5 18.8h15" opacity=".55"/>',
   cloche: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
 };
 function icone(nom) {
@@ -121,7 +124,12 @@ const TYPES = {
   note: { lib: 'Note', c: 'var(--doux)' },
   // v4 (24/11/2026, JL : « parfois ce sont juste des infos, et elle a rien a valider »)
   info: { lib: 'Pour info', c: '#6B6580' },
+  // v6 (25/11/2026, JL : « Il faut que ce soit super simple [...] comme envoyer un message
+  // Telegram ») : un dépôt n'a plus de type ni d'échéance ; c'est un message.
+  message: { lib: 'Message', c: 'var(--doux)' },
 };
+// Sans échéance : l'heure du dépôt tient lieu de repère.
+function sansEcheance(d) { return d.type === 'info' || d.type === 'message'; }
 
 // v5 (24/11/2026, JL : « une couleur com, logistique, cabinet », puis « légistique » ;
 // « tu mets pas nos noms ») : un pôle par compte de l'équipe, une couleur sobre par pôle.
