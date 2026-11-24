@@ -1,4 +1,4 @@
-// sw.js - service de fond de l'appli « À décider » (v2, 24/11/2026).
+// sw.js - service de fond de l'appli « Paraphe », ex « À décider » (v2, 24/11/2026 ; v6, 25/11/2026).
 // 1. Reçoit les alertes Firebase quand l'appli est fermée et les affiche ;
 //    un toucher ouvre la demande (lien fourni par le serveur).
 // 2. Garde une copie des fichiers de l'appli : elle s'ouvre même sans réseau.
@@ -10,7 +10,7 @@ if (CFG.firebase) {
   firebase.messaging();
 }
 
-const CACHE = 'a-decider-v5';
+const CACHE = 'paraphe-v6';
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));

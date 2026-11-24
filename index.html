@@ -6,13 +6,15 @@
 <meta name="theme-color" content="#F3F4F6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="À décider">
-<title>À décider</title>
+<meta name="apple-mobile-web-app-title" content="Paraphe">
+<title>Paraphe</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icones/192.png">
 <link rel="apple-touch-icon" href="icones/180.png">
 <!--
-  Appli de décision de la députée « À décider » (nom choisi par JL le 23/11/2026).
+  Appli de décision de la députée « Paraphe » (d'abord « À décider », nom choisi par JL le
+  23/11/2026 ; renommée le 25/11/2026, JL : « changer le nom de l'appli pour lui donner un nom
+  un peu plus clean » ; choix : « Paraphe »).
   JL (23/11/2026) : « le but de l'application, c'est de lui permettre de décider
   en fonction de ce qu'on lui donne comme information et qu'elle puisse faire
   des arbitrages ». « elle a le document ou la demande écrite en gros, où elle
@@ -30,12 +32,13 @@
 @font-face{font-family:"Plex";src:url("polices/plex-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:"Plex";src:url("polices/plex-600.woff2") format("woff2");font-weight:600 700;font-style:normal;font-display:swap}
 :root{
-  --fond:#F3F4F6; --carte:#FFFFFF; --encre:#14213D; --doux:#5A6476; --ligne:#D9DDE3; --ligne-forte:#B9C0CB;
+  --fond:#F4F5F8; --carte:#FFFFFF; --encre:#14213D; --doux:#5A6476; --ligne:#E1E4EA; --ligne-forte:#B9C0CB;
   --accent:#1F3A68; --accent-pale:#E8EDF5;
   --urgent:#C0262D; --urgent-pale:#FBEAEA;
   --oui:#1E6B45; --oui-pale:#E5F1EA; --non:#A8231C; --non-pale:#F7E6E5;
   --revoir:#8A5A00; --revoir-pale:#F8EFDC;
-  --rayon:4px;
+  --rayon:12px; --rayon-p:8px;
+  --ombre:0 1px 2px rgba(20,33,61,.05),0 3px 10px rgba(20,33,61,.05);
   --ui:"Plex",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   --bas:env(safe-area-inset-bottom,0px);
 }
@@ -51,7 +54,7 @@ h1,h2,h3,p{margin:0}
 .colonnes{max-width:1280px;margin:0 auto;padding:calc(6px + env(safe-area-inset-top,0px)) 16px calc(96px + var(--bas))}
 .vue h2{font-size:21px;font-weight:700;margin:14px 2px 10px;display:flex;align-items:center;gap:8px;letter-spacing:-.01em}
 .vue h2 .actions{margin-left:auto;display:flex;align-items:center;gap:2px}
-.compte{background:var(--accent);color:#fff;font-size:13px;border-radius:3px;padding:1px 7px;font-weight:700}
+.compte{background:var(--accent);color:#fff;font-size:13px;border-radius:999px;padding:1px 7px;font-weight:700}
 body.onglet-trancher #vue-agenda{display:none}
 body.onglet-agenda #vue-trancher{display:none}
 
@@ -60,7 +63,7 @@ body.onglet-agenda #vue-trancher{display:none}
 .onglets button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:13px;font-weight:600;color:var(--doux);position:relative}
 .onglets button[aria-selected="true"]{color:var(--accent)}
 .onglets svg{width:25px;height:25px}
-.onglets .pastille{position:absolute;top:2px;left:calc(50% + 8px);background:var(--accent);color:#fff;font-size:12px;border-radius:3px;padding:0 5px;font-weight:700;line-height:18px}
+.onglets .pastille{position:absolute;top:2px;left:calc(50% + 8px);background:var(--accent);color:#fff;font-size:12px;border-radius:999px;padding:0 6px;font-weight:700;line-height:18px}
 
 /* Cloche des alertes */
 .cloche{position:relative;width:38px;height:38px;display:grid;place-items:center;border-radius:var(--rayon);color:var(--doux)}
@@ -70,18 +73,19 @@ body.onglet-agenda #vue-trancher{display:none}
 
 /* Filtres par pôle (v5) */
 .filtres{display:flex;gap:8px;margin:0 0 12px;flex-wrap:wrap}
-.filtre{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--ligne);background:var(--carte);border-radius:var(--rayon);padding:7px 11px;font-size:14.5px;font-weight:600;color:var(--encre)}
-.filtre i{width:10px;height:10px;background:var(--c);border-radius:1px}
+.filtre{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--ligne);background:var(--carte);border-radius:999px;padding:7px 13px;font-size:14.5px;font-weight:600;color:var(--encre)}
+.filtre i{width:9px;height:9px;background:var(--c);border-radius:50%}
 .filtre .nb{color:var(--doux);font-weight:400}
 .filtre.actif{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c);background:color-mix(in srgb,var(--c) 7%,#fff)}
 
 /* Cartes de la liste */
-.carte{display:block;background:var(--carte);border:1px solid var(--ligne);border-left:4px solid var(--c,var(--accent));border-radius:var(--rayon);margin-bottom:10px}
-.carte.est-urgent{border-color:var(--ligne) var(--ligne) var(--ligne) var(--c);box-shadow:inset 0 3px 0 var(--urgent)}
+.carte{display:block;position:relative;background:var(--carte);border:1px solid var(--ligne);border-radius:var(--rayon);margin-bottom:10px;box-shadow:var(--ombre);overflow:hidden}
+.carte::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--accent))}
+.carte.est-urgent{box-shadow:var(--ombre),inset 0 3px 0 var(--urgent)}
 .corps-carte{display:block;width:100%;text-align:left;padding:14px 16px 12px}
 .ligne1{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
 .etiq{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
-.urgent-tag{background:var(--urgent);color:#fff;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;border-radius:2px}
+.urgent-tag{background:var(--urgent);color:#fff;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:999px}
 .pole{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c)}
 .type{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--doux)}
 .type svg{width:15px;height:15px}
@@ -98,14 +102,14 @@ body.onglet-agenda #vue-trancher{display:none}
 .pj-ligne b{color:var(--accent);font-size:14px}
 .carte .pied{margin-top:9px;font-size:13px;color:var(--doux)}
 .choix-carte{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:6px;padding:0 12px 12px}
-.choix-carte button{height:44px;border-radius:var(--rayon);font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px}
+.choix-carte button{height:44px;border-radius:var(--rayon-p);font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px}
 .choix-carte svg{width:18px;height:18px}
 .vide{background:var(--carte);border:1px solid var(--ligne);border-radius:var(--rayon);padding:28px 20px;text-align:center;color:var(--doux)}
 .vide strong{display:block;color:var(--encre);font-size:18px;margin-bottom:4px}
 
 /* Pour info (v4) */
 .titre-info{font-size:15px;font-weight:700;color:var(--doux);margin:22px 2px 10px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.05em}
-.compte-info{background:var(--ligne);color:var(--doux);font-size:12.5px;border-radius:3px;padding:1px 7px;letter-spacing:0}
+.compte-info{background:var(--ligne);color:var(--doux);font-size:12.5px;border-radius:999px;padding:1px 7px;letter-spacing:0}
 .carte-info{display:flex;align-items:stretch;overflow:hidden}
 .ouvrir-info{flex:1;min-width:0;text-align:left;padding:13px 12px 12px 15px}
 .carte-info h3{font-size:17px}
@@ -171,7 +175,7 @@ body.onglet-agenda #vue-trancher{display:none}
 
 /* Feuille de réponse */
 .voile{position:fixed;inset:0;background:rgba(15,20,35,.35);z-index:30}
-.feuille{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--carte);border-radius:8px 8px 0 0;padding:10px 18px calc(16px + var(--bas));max-width:760px;margin:0 auto;box-shadow:0 -4px 24px rgba(0,0,0,.15)}
+.feuille{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--carte);border-radius:18px 18px 0 0;padding:10px 18px calc(16px + var(--bas));max-width:760px;margin:0 auto;box-shadow:0 -4px 24px rgba(0,0,0,.15)}
 .feuille .poignee{width:40px;height:4px;border-radius:2px;background:var(--ligne);margin:0 auto 12px}
 .feuille h3{font-size:21px;font-weight:700}
 .sous-titre{color:var(--doux);font-size:14.5px;margin:2px 0 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -194,12 +198,12 @@ body.onglet-agenda #vue-trancher{display:none}
 #agenda-nav{margin-left:auto;display:flex;align-items:center;gap:2px}
 .nav-jour{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--ligne);border-radius:var(--rayon);background:var(--carte);color:var(--accent)}
 .nav-jour svg{width:18px;height:18px}
-.bande{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;align-items:flex-start;padding-bottom:4px}
+.bande{display:flex;gap:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;align-items:flex-start;padding-bottom:4px}
 .bande::-webkit-scrollbar{display:none}
-.jourcol{flex:0 0 calc(100% - 30px);scroll-snap-align:start;min-width:0}
+.jourcol{flex:0 0 calc(100% - 30px);min-width:0}
 .titre-jour{font-size:15px;font-weight:700;color:var(--encre);margin:2px 2px 8px;padding-bottom:6px;border-bottom:2px solid var(--ligne)}
 .jourcol.auj .titre-jour{border-bottom-color:var(--accent);color:var(--accent)}
-.evt{display:flex;gap:12px;background:var(--carte);border:1px solid var(--ligne);border-radius:var(--rayon);padding:13px;margin-bottom:8px}
+.evt{display:flex;gap:12px;background:var(--carte);border:1px solid var(--ligne);border-radius:var(--rayon);padding:13px;margin-bottom:8px;box-shadow:var(--ombre)}
 .evt .h{width:56px;flex:none;font-weight:700;font-size:16px;line-height:1.2}
 .evt .h small{display:block;font-weight:400;color:var(--doux);font-size:13.5px}
 .evt .c{flex:1;min-width:0}
@@ -209,8 +213,9 @@ body.onglet-agenda #vue-trancher{display:none}
 .evt.passe{opacity:.55}
 .drapeau{display:inline-block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:3px}
 .docs{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
-.docs button{display:inline-flex;align-items:center;gap:6px;background:var(--accent-pale);color:var(--accent);border-radius:var(--rayon);padding:7px 10px;font-size:14.5px;font-weight:600}
-.docs svg{width:16px;height:16px}
+.docs button{display:inline-flex;align-items:center;gap:6px;max-width:100%;min-width:0;background:var(--accent-pale);color:var(--accent);border-radius:var(--rayon);padding:7px 10px;font-size:14.5px;font-weight:600}
+.docs svg{width:16px;height:16px;flex:none}
+.docs button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .journee{background:var(--carte);border:1px solid var(--ligne);border-left:3px solid var(--accent);border-radius:var(--rayon);padding:10px 13px;margin-bottom:8px;font-weight:600}
 .journee small{color:var(--doux);font-weight:400}
 
@@ -232,7 +237,7 @@ body.onglet-agenda #vue-trancher{display:none}
 /* Connexion, équipe, dépôt, hors connexion */
 .connexion{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:24px;background:var(--fond)}
 .c-boite{width:min(100%,380px);display:flex;flex-direction:column;gap:12px;text-align:center}
-.c-logo{width:64px;height:64px;border-radius:6px;background:var(--accent);color:#fff;display:grid;place-items:center;margin:0 auto 4px}
+.c-logo{width:64px;height:64px;border-radius:16px;background:var(--accent);color:#fff;display:grid;place-items:center;margin:0 auto 4px}
 .c-logo svg{width:36px;height:36px;stroke-width:2.6}
 .c-boite h1{font-size:28px;letter-spacing:-.015em;font-weight:600}
 .c-sous{color:var(--doux);margin-bottom:8px}
@@ -275,17 +280,80 @@ body.onglet-agenda #vue-trancher{display:none}
 .pj button{width:32px;height:32px;display:grid;place-items:center;color:var(--doux)}
 body.equipe .vu-rapide{display:none}
 
+
+/* v6 (25/11/2026) : l'équipe écrit à Sophia comme dans une messagerie */
+.composeur{background:var(--carte);border:1px solid var(--ligne);border-radius:16px;box-shadow:var(--ombre);padding:10px 10px 8px;margin:4px 0 14px}
+.composeur textarea{width:100%;border:0;resize:none;font:inherit;font-size:17px;line-height:1.4;padding:6px 6px 4px;background:transparent;color:var(--encre);max-height:220px;min-height:34px}
+.composeur textarea:focus{outline:none}
+.composeur:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
+.m-pieces{display:flex;flex-wrap:wrap;gap:6px;padding:2px 4px}
+.m-pieces:empty{display:none}
+.m-pj{display:inline-flex;align-items:center;gap:6px;max-width:100%;background:var(--accent-pale);color:var(--accent);border-radius:999px;padding:4px 4px 4px 11px;font-size:14px;font-weight:600}
+.m-pj svg{width:15px;height:15px;flex:none}
+.m-pj .m-nom{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46vw}
+.m-pj small{color:var(--doux);font-weight:400}
+.m-pj button{width:26px;height:26px;display:grid;place-items:center;border-radius:50%;color:var(--accent)}
+.m-pj button svg{width:14px;height:14px}
+.m-bas{display:flex;align-items:center;gap:6px;margin-top:4px}
+.m-trombone{width:40px;height:40px;display:grid;place-items:center;border-radius:50%;color:var(--doux)}
+.m-trombone:hover{background:var(--fond);color:var(--accent)}
+.m-trombone svg{width:22px;height:22px}
+.m-case{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ligne);border-radius:999px;padding:6px 12px 6px 9px;font-size:14.5px;font-weight:600;color:var(--doux);cursor:pointer;user-select:none}
+.m-case input{width:16px;height:16px;margin:0;accent-color:var(--accent)}
+.m-case.urgent input{accent-color:var(--urgent)}
+.m-case:has(input:checked){border-color:var(--accent);color:var(--accent);background:var(--accent-pale)}
+.m-case.urgent:has(input:checked){border-color:var(--urgent);color:var(--urgent);background:var(--urgent-pale)}
+.m-envoyer{margin-left:auto;display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 16px 0 13px;border-radius:999px;background:var(--accent);color:#fff;font-weight:600;font-size:15.5px}
+.m-envoyer svg{width:18px;height:18px}
+.m-envoyer:disabled{opacity:.6}
+.composeur .c-msg{padding:4px 6px 0;font-size:14.5px;color:var(--urgent)}
+.composeur .c-msg:empty{display:none}
+.voile-glisser{position:fixed;inset:0;z-index:50;background:rgba(31,58,104,.10);display:grid;place-items:center;pointer-events:none;border:3px dashed var(--accent)}
+.voile-glisser>div{display:flex;align-items:center;gap:10px;background:var(--carte);border-radius:999px;padding:14px 22px;font-weight:600;color:var(--accent);box-shadow:0 8px 30px rgba(0,0,0,.15)}
+.voile-glisser svg{width:22px;height:22px}
+.voile-glisser.sur-rdv{background:transparent}
+.voile-glisser.sur-rdv>div{display:none}
+.evt.cible{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
+.joindre{display:inline-flex;align-items:center;gap:5px;margin-top:9px;color:var(--doux);font-size:14px;font-weight:600;border:1px dashed var(--ligne-forte);border-radius:999px;padding:5px 11px}
+.joindre svg{width:15px;height:15px}
+.joindre:hover{color:var(--accent);border-color:var(--accent)}
+
+/* Envois de l'équipe, avec la réponse de Sophia sur le message même */
+.carte-envoi{padding:13px 15px 12px 17px}
+.carte-envoi .docs{margin-top:9px}
+.reponse{margin-top:11px;border-radius:var(--rayon-p);padding:10px 12px;background:color-mix(in srgb,var(--r) 9%,#fff);border:1px solid color-mix(in srgb,var(--r) 22%,#fff)}
+.rep-tete{font-size:14px;color:var(--doux)}
+.rep-tete b{color:var(--r);font-size:15px;text-transform:uppercase;letter-spacing:.04em}
+.rep-com{margin-top:4px;font-size:16px;color:var(--encre)}
+.reponse .histo-vocal{margin-top:7px}
+.attente-rep{background:var(--fond);border:1px dashed var(--ligne-forte);color:var(--doux);font-size:14.5px;font-weight:600;padding:8px 12px}
+.carte.eclaire{animation:eclaire 2.4s ease-out}
+@keyframes eclaire{0%,40%{box-shadow:0 0 0 4px var(--accent-pale),var(--ombre)}100%{box-shadow:var(--ombre)}}
+.deconnexion{display:block;margin:22px auto 0;color:var(--doux);font-size:14.5px;text-decoration:underline;padding:10px}
+
 /* Ordinateur : deux colonnes côte à côte */
 @media (min-width:960px){
   .onglets{display:none}
   body.onglet-trancher #vue-agenda,body.onglet-agenda #vue-trancher{display:block}
-  .colonnes{display:grid;grid-template-columns:minmax(0,1fr) 560px;gap:28px;padding-bottom:40px}
-  #vue-agenda{position:sticky;top:12px;align-self:start;max-height:calc(100vh - 24px);overflow-y:auto}
-  .jourcol{flex-basis:calc(50% - 6px)}
-  .ecran{inset:24px auto 24px 50%;transform:translateX(-50%);width:min(900px,calc(100vw - 48px));border:1px solid var(--ligne-forte);border-radius:6px;box-shadow:0 16px 48px rgba(0,0,0,.22);overflow:hidden}
+  /* v6 (JL : « que ça puisse prendre bien l'écran pile ») : toute la largeur et toute la
+     hauteur ; l'agenda montre autant de jours que la place le permet (--n, calculé par p4). */
+  .colonnes{display:grid;grid-template-columns:minmax(380px,31%) minmax(0,1fr);gap:24px;max-width:none;padding:8px 22px 24px}
+  #vue-agenda{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding-bottom:20px}
+  .bande{cursor:grab}
+  .bande.tiree{cursor:grabbing;user-select:none}
+  .jourcol{flex-basis:calc((100% - (var(--n,4) - 1) * 12px) / var(--n,4))}
+  .m-pj .m-nom{max-width:240px}
+  /* Colonnes étroites : l'heure passe au-dessus du titre, le titre prend toute la largeur. */
+  .evt{flex-direction:column;gap:3px;padding:11px 12px}
+  .evt .h{width:auto;display:flex;align-items:baseline;gap:6px;font-size:15px}
+  .evt .h small{display:inline;font-size:13px}
+  .evt .h small::before{content:"- "}
+  .evt .joindre{display:none}
+  .evt:hover .joindre,.evt.cible .joindre{display:inline-flex}
+  .ecran{inset:24px auto 24px 50%;transform:translateX(-50%);width:min(900px,calc(100vw - 48px));border:1px solid var(--ligne-forte);border-radius:18px;box-shadow:0 16px 48px rgba(0,0,0,.22);overflow:hidden}
   .voile-ecran{position:fixed;inset:0;background:rgba(15,20,35,.35);z-index:19}
   .toast{bottom:28px}
-  .feuille{bottom:24px;border-radius:6px}
+  .feuille{bottom:24px;border-radius:18px}
   .fab{bottom:28px;right:28px}
 }
 </style>
