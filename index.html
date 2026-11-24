@@ -320,6 +320,7 @@ body.equipe .vu-rapide{display:none}
 <div class="voile" id="voile" hidden></div>
 <div class="feuille" id="feuille" hidden></div>
 <div class="toast" id="toast" hidden></div>
+<script src="config.js"></script>
 <script>
 (async function(){
   const L = await (await fetch('js/liste.json?t=' + Date.now(), {cache: 'no-store'})).json();
