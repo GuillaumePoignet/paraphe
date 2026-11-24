@@ -2,7 +2,7 @@
  "morceaux": [
   {
    "nom": "p1_base.js",
-   "empreinte": "f43deda5b7"
+   "empreinte": "8069bafdf0"
   },
   {
    "nom": "p2_serveur.js",
@@ -10,27 +10,27 @@
   },
   {
    "nom": "p3_trancher.js",
-   "empreinte": "fc7e0e3c71"
+   "empreinte": "7c997772f9"
   },
   {
    "nom": "p4_agenda.js",
-   "empreinte": "b1b4a7caa0"
+   "empreinte": "c2006577f7"
   },
   {
    "nom": "p5_lecteur.js",
-   "empreinte": "10ca1e6af3"
+   "empreinte": "78ad5ba0c8"
   },
   {
    "nom": "p6_demarrage.js",
-   "empreinte": "669bb9e2d6"
+   "empreinte": "1787c81919"
   },
   {
    "nom": "p7_deposer.js",
-   "empreinte": "7107122d25"
+   "empreinte": "ae84245d70"
   },
   {
    "nom": "p8_alertes.js",
-   "empreinte": "bd5fc72222"
+   "empreinte": "94bc48100b"
   },
   {
    "nom": "p9_lancement.js",

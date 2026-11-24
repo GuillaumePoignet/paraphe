@@ -6,8 +6,8 @@ function rendreOnglets() {
   const n = S.demandes.filter(d => !estInfo(d)).length;
   const ot = $('#o-trancher'), oa = $('#o-agenda');
   ot.innerHTML = ''; oa.innerHTML = '';
-  ot.append(icone('liste'), estDeputee() ? 'Arbitrages' : 'En attente');
-  if (n) ot.append(el('span', { class: 'pastille' }, String(n)));
+  ot.append(icone('liste'), estDeputee() ? 'Arbitrages' : 'Envois');
+  if (estDeputee() && n) ot.append(el('span', { class: 'pastille' }, String(n)));
   oa.append(icone('agenda'), 'Agenda');
   ot.setAttribute('aria-selected', String(S.onglet === 'trancher'));
   oa.setAttribute('aria-selected', String(S.onglet === 'agenda'));
@@ -17,7 +17,7 @@ function choisirOnglet(o) {
   document.body.className = 'onglet-' + o + (estDeputee() ? '' : ' equipe');
   rendreOnglets();
   window.scrollTo(0, 0);
-  if (o === 'agenda') placerBande(S.jourSel, false);   // la bande n'a sa largeur qu'une fois visible
+  if (o === 'agenda') placerBande(S.jourPos != null ? S.jourPos : S.jourSel, false);   // la bande n'a sa largeur qu'une fois visible
 }
 function estDeputee() { return !S.moi || S.moi.role === 'deputee'; }
 
@@ -28,13 +28,16 @@ function toutRendre() {
   document.body.classList.toggle('equipe', !estDeputee());
   // v4 (24/11/2026, JL : « \"Arbitrage\" plutot que \"a trancher\" ») ; date et
   // salutation retirées (JL : « tu n'a pas enlevé toute cette artie inutile »).
-  $('#btn-histo').textContent = estDeputee() ? 'Déjà arbitré' : 'Réponses';
-  $('#titre-txt').textContent = estDeputee() ? 'Arbitrages' : 'En attente de Sophia';
+  // v6 (JL : « où est-ce qu'on voit les retours de Sophia ? ») : côté équipe, les réponses
+  // sont sur les envois mêmes ; plus de lien « Réponses ».
+  $('#btn-histo').textContent = 'Déjà arbitré';
+  $('#btn-histo').hidden = !estDeputee();
+  $('#titre-txt').textContent = estDeputee() ? 'Arbitrages' : 'Envois';
   $('#hors-ligne').hidden = !S.horsLigne;
   rendreAlerte();
   rendreListe();
   rendreAgenda();
-  if (typeof rendreBoutonDeposer === 'function') rendreBoutonDeposer();
+  if (typeof rendreComposeur === 'function') rendreComposeur();
   if (S.ouverte) {
     const d = S.demandes.find(x => x.id === S.ouverte.id);
     if (d && !$('#fiche').hidden && $('#feuille').hidden) { S.ouverte = d; rendreFiche(d); }
@@ -64,8 +67,8 @@ function afficherConnexion() {
     }
     bouton.disabled = false; bouton.textContent = 'Entrer';
   } }, [
-    el('div', { class: 'c-logo' }, icone('oui')),
-    el('h1', null, 'À décider'),
+    el('div', { class: 'c-logo' }, icone('paraphe')),
+    el('h1', null, 'Paraphe'),
     el('p', { class: 'c-sous' }, 'Une seule fois sur ce téléphone.'),
     nom, code, msg, bouton,
   ]);
@@ -90,10 +93,19 @@ async function demarrer() {
   // Les heures de l'agenda se remettent à jour chaque minute.
   setInterval(() => { if (S.moi && !S.ouverte) rendreAgenda(); }, 60000);
 }
+function eclairerEnvoi(id) {
+  const c = $('#liste .carte[data-id="' + id + '"]');
+  if (!c) return;
+  c.scrollIntoView({ block: 'center' });
+  c.classList.add('eclaire');
+  setTimeout(() => c.classList.remove('eclaire'), 2400);
+}
 // Lien direct depuis une alerte : ...#d=<id> ouvre la demande.
 function ouvrirDepuisLien() {
   const m = location.hash.match(/d=([\w-]+)/);
   if (!m || !S.moi) return;
+  // v6 : côté équipe, l'alerte d'une réponse amène sur l'envoi, qui porte la réponse.
+  if (!estDeputee()) { choisirOnglet('trancher'); eclairerEnvoi(m[1]); return; }
   if (S.demandes.some(x => x.id === m[1])) { choisirOnglet('trancher'); ouvrirArbitrage(m[1]); }   // v5 : la pièce s'ouvre directement
   else if (S.tranchees.some(x => x.demande.id === m[1])) ouvrirHisto();
 }
