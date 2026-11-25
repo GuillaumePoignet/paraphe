@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="Paraphe">
 <title>Paraphe</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icones/192.png">
-<link rel="apple-touch-icon" href="icones/180.png">
+<link rel="icon" href="icones/192.png?v=7">
+<link rel="apple-touch-icon" href="icones/180.png?v=7">
 <!--
   Appli de décision de la députée « Paraphe » (d'abord « À décider », nom choisi par JL le
   23/11/2026 ; renommée le 25/11/2026, JL : « changer le nom de l'appli pour lui donner un nom
@@ -209,14 +209,16 @@ body.onglet-agenda #vue-trancher{display:none}
 .evt .c{flex:1;min-width:0}
 .evt .t{font-weight:600;font-size:16.5px;line-height:1.25}
 .evt .l{color:var(--doux);font-size:14px;margin-top:2px}
-.evt.encours{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.evt{position:relative;overflow:hidden}
+.evt::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ev,transparent)}
+.evt.encours{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),var(--ombre)}
 .evt.passe{opacity:.55}
 .drapeau{display:inline-block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:3px}
 .docs{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
 .docs button{display:inline-flex;align-items:center;gap:6px;max-width:100%;min-width:0;background:var(--accent-pale);color:var(--accent);border-radius:var(--rayon);padding:7px 10px;font-size:14.5px;font-weight:600}
 .docs svg{width:16px;height:16px;flex:none}
 .docs button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.journee{background:var(--carte);border:1px solid var(--ligne);border-left:3px solid var(--accent);border-radius:var(--rayon);padding:10px 13px;margin-bottom:8px;font-weight:600}
+.journee{background:var(--carte);border:1px solid var(--ligne);border-left:4px solid var(--ev,var(--accent));border-radius:var(--rayon);padding:10px 13px;margin-bottom:8px;font-weight:600}
 .journee small{color:var(--doux);font-weight:400}
 
 /* Historique */
@@ -237,7 +239,9 @@ body.onglet-agenda #vue-trancher{display:none}
 /* Connexion, équipe, dépôt, hors connexion */
 .connexion{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:24px;background:var(--fond)}
 .c-boite{width:min(100%,380px);display:flex;flex-direction:column;gap:12px;text-align:center}
-.c-logo{width:64px;height:64px;border-radius:16px;background:var(--accent);color:#fff;display:grid;place-items:center;margin:0 auto 4px}
+.c-logo{width:64px;height:64px;border-radius:16px;background:#fff;border:1px solid var(--ligne);color:var(--accent);display:grid;place-items:center;margin:0 auto 4px;box-shadow:var(--ombre)}
+/* v7 : logo « Papier » (JL : « J'aime bien papier ») : encre marine, filet rouge. */
+.c-logo svg path:last-child{stroke:var(--urgent);opacity:1}
 .c-logo svg{width:36px;height:36px;stroke-width:2.6}
 .c-boite h1{font-size:28px;letter-spacing:-.015em;font-weight:600}
 .c-sous{color:var(--doux);margin-bottom:8px}
@@ -338,6 +342,8 @@ body.equipe .vu-rapide{display:none}
   /* v6 (JL : « que ça puisse prendre bien l'écran pile ») : toute la largeur et toute la
      hauteur ; l'agenda montre autant de jours que la place le permet (--n, calculé par p4). */
   .colonnes{display:grid;grid-template-columns:minmax(380px,31%) minmax(0,1fr);gap:24px;max-width:none;padding:8px 22px 24px}
+  /* v7 (JL : « côté équipe, il faut que envoi soit [...] plus grand [...] L'agenda prend trop de place par rapport à envoi ») */
+  body.equipe .colonnes{grid-template-columns:minmax(520px,56%) minmax(0,1fr)}
   #vue-agenda{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding-bottom:20px}
   .bande{cursor:grab}
   .bande.tiree{cursor:grabbing;user-select:none}
