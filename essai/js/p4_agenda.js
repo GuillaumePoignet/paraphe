@@ -13,6 +13,7 @@
 // par jour avec ses rendez-vous empilés tels qu'avant (heure, titre, lieu,
 // documents) ; on glisse le doigt d'un jour à l'autre, sans fin vers le passé comme
 // vers l'avenir ; les jours se chargent au fur et à mesure.
+// v7 : l'agenda commence à aujourd'hui (JL : « Juste aujourd'hui, pas la veille »).
 //
 // v6 (25/11/2026, JL : « j'aime pas le truc de quand on swipe, ça décale vers le jour
 // d'après. C'est pas smooth [...] ça glisse pas, ça bloque » ; arbitrage : « Totalement
@@ -109,7 +110,7 @@ function placerBande(k, doux) {
   else b.scrollLeft = x;
 }
 
-function allerAuJour(k) { S.jourSel = k; S.jourPos = k; placerBande(k, true); }
+function allerAuJour(k) { k = Math.max(0, k); S.jourSel = k; S.jourPos = k; placerBande(k, true); }
 
 // À l'ordinateur : nombre de jours visibles d'après la largeur (une colonne fait 220 px au moins).
 function joursVisibles() {
@@ -145,8 +146,8 @@ function suivreBande() {
     S.jourPos = S.agPlage.de + b.scrollLeft / w;
     S.jourSel = Math.round(S.jourPos);
     rendreEnteteAgenda();
-    if (S.jourSel - S.agPlage.de < 5) etendreAgenda(-1);
-    else if (S.agPlage.a - S.jourSel < 14) etendreAgenda(1);
+    // v7 : rien avant aujourd'hui ; on n'ajoute des jours que vers l'avenir.
+    if (S.agPlage.a - S.jourSel < 14) etendreAgenda(1);
   }, 140);
 }
 
@@ -172,7 +173,7 @@ function rendreEnteteAgenda() {
   if (!z) return;
   z.innerHTML = '';
   z.append(
-    el('button', { class: 'nav-jour', 'aria-label': 'Jour précédent', onclick: () => allerAuJour(Math.ceil((S.jourPos != null ? S.jourPos : S.jourSel) - 0.05) - 1) }, icone('gauche')),
+    el('button', { class: 'nav-jour', 'aria-label': 'Jour précédent', disabled: (S.jourPos != null ? S.jourPos : S.jourSel) <= 0.05, onclick: () => allerAuJour(Math.ceil((S.jourPos != null ? S.jourPos : S.jourSel) - 0.05) - 1) }, icone('gauche')),
     el('button', { class: 'lien' + (S.jourSel === 0 ? ' discret' : ''), onclick: () => allerAuJour(0) }, "Aujourd'hui"),
     el('button', { class: 'nav-jour', 'aria-label': 'Jour suivant', onclick: () => allerAuJour(Math.floor((S.jourPos != null ? S.jourPos : S.jourSel) + 0.05) + 1) }, icone('droite')),
   );
