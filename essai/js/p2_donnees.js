@@ -42,9 +42,12 @@ function agendaExemple(k) {
   };
   const jour = ajouterJours(debutJour(maintenant()), k);
   const liste = fixes[k] || type[jour.getDay()];
+  // v7 : couleurs comme dans l'Agenda du Cabinet (palette de Google Agenda), par sorte de rendez-vous.
+  const couleur = (t) => /Séance|Questions au gouvernement/.test(t) ? '#D50000' : /Commission|Groupe/.test(t) ? '#3F51B5'
+    : /Interview|Radio/.test(t) ? '#F4511E' : /Conseil de Paris/.test(t) ? '#8E24AA' : /équipe/.test(t) ? '#616161' : '#33B679';
   return liste.map((e, i) => e.journee
-    ? { id: 'x' + k + '-' + i, titre: e.titre, lieu: e.lieu, journee: true, debut: aJour(k, 0), fin: aJour(k + 1, 0), docs: [] }
-    : { id: 'x' + k + '-' + i, titre: e.titre, lieu: e.lieu, debut: aJour(k, e.h[0], e.h[1]), fin: aJour(k, e.h[2], e.h[3]), docs: e.docs || [] });
+    ? { id: 'x' + k + '-' + i, titre: e.titre, lieu: e.lieu, journee: true, debut: aJour(k, 0), fin: aJour(k + 1, 0), docs: [], couleur: couleur(e.titre) }
+    : { id: 'x' + k + '-' + i, titre: e.titre, lieu: e.lieu, debut: aJour(k, e.h[0], e.h[1]), fin: aJour(k, e.h[2], e.h[3]), docs: e.docs || [], couleur: couleur(e.titre) });
 }
 
 function donneesExemple() {
