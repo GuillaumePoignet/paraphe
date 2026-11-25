@@ -59,12 +59,14 @@ function colonneJour(k) {
   const t = maintenant();
   evts.forEach(e => {
     if (e.journee) {
-      col.appendChild(el('div', { class: 'journee' }, [e.titre, ' ', el('small', null, 'toute la journée' + (e.lieu ? ', ' + e.lieu : ''))]));
+      col.appendChild(el('div', { class: 'journee', style: e.couleur ? { '--ev': e.couleur } : null }, [e.titre, ' ', el('small', null, 'toute la journée' + (e.lieu ? ', ' + e.lieu : ''))]));
       return;
     }
     const encours = new Date(e.debut) <= t && t < new Date(e.fin);
     const passe = new Date(e.fin) <= t;
-    col.appendChild(el('div', { class: 'evt' + (encours ? ' encours' : '') + (passe ? ' passe' : ''), 'data-id': e.id }, [
+    // v7 (25/11/2026, JL : « mettre les mêmes couleurs que ce qu'il y a sur l'agenda du cabinet », « sur le
+    // côté un petit peu assez discret ») : un filet de la couleur du rendez-vous à gauche du bloc.
+    col.appendChild(el('div', { class: 'evt' + (encours ? ' encours' : '') + (passe ? ' passe' : ''), 'data-id': e.id, style: e.couleur ? { '--ev': e.couleur } : null }, [
       el('div', { class: 'h' }, [heure(e.debut), el('small', null, heure(e.fin))]),
       el('div', { class: 'c' }, [
         encours ? el('div', { class: 'drapeau' }, 'En ce moment') : null,
