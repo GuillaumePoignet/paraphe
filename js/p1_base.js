@@ -33,8 +33,10 @@ const S = {
   notifs: false,
   // v5 : filtre par pôle (vide = tout) ; agenda : jours dessinés, jours chargés (décalages depuis aujourd'hui).
   filtrePole: '',
-  agPlage: { de: -7, a: 20 },
-  agCouvert: { de: -7, a: 20 },
+  // v7 (25/11/2026, JL : « Il peut remonter que jusqu'à la veille du jour, pas avant », puis « Juste
+  // aujourd'hui, pas la veille ») : l'agenda commence à aujourd'hui.
+  agPlage: { de: 0, a: 27 },
+  agCouvert: { de: 0, a: 20 },
 }; 
 
 // Dates et heures, à la française

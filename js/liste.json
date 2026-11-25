@@ -2,7 +2,7 @@
  "morceaux": [
   {
    "nom": "p1_base.js",
-   "empreinte": "db9ba880b2"
+   "empreinte": "c3711aa3f5"
   },
   {
    "nom": "p2_serveur.js",
@@ -14,7 +14,7 @@
   },
   {
    "nom": "p4_agenda.js",
-   "empreinte": "fed56a6525"
+   "empreinte": "e4a001b52f"
   },
   {
    "nom": "p5_lecteur.js",
